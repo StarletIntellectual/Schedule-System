@@ -54,5 +54,8 @@ dependencies {
     //rxjava
     api("io.reactivex.rxjava2:rxandroid:2.1.1")
     api("io.reactivex.rxjava2:rxjava:2.2.12")
-    api("androidx.preference:preference:1.2.0")
+    api("androidx.preference:preference:1.2.1")
+
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
 }

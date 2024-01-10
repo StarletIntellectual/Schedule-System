@@ -1,46 +1,50 @@
 package com.example.schedulesystem
 
 import android.os.Bundle
-import android.provider.ContactsContract.Intents.Insert.DATA
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.schedulesystem.apiService.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var myTextView: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        run()
+        myTextView = findViewById(R.id.my_text_view)
+        getMessage()
     }
 
-    private fun run() {
-        println(sendGet("http://localhost:8088/demo/first"))
-    }
+    private fun getMessage() {
+        val client = OkHttpClient()
 
-    private fun sendGet(url: String): String {
-        val client = OkHttpClient().newBuilder()
-            .connectTimeout(180, TimeUnit.SECONDS)
-            .readTimeout(180, TimeUnit.SECONDS)
-            .writeTimeout(180, TimeUnit.SECONDS)
+        val request = Request.Builder()
+            .url("http://192.168.31.167:8088/demo/first")
             .build()
-        val request: Request = Request.Builder()
-            .url(url)
-            .get()
-            .build()
-        val response: Response
-        val result: String
-        try {
-            response = client.newCall(request).execute()
-            result = response.body!!.string()
-        } catch (e: IOException) {
-            throw IOException(DATA, e)
-        }
-        return result
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                myTextView.text = response.body!!.string()
+                // 在这里处理返回的结果
+            }
+        })
+
     }
 }
